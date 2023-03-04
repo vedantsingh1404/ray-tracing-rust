@@ -1,0 +1,143 @@
+use std::ops::{Add, Div, Mul, Neg, Sub};
+
+#[derive(Debug, Copy, Clone)]
+pub struct Vec3 {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
+impl Vec3 {
+    pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
+        Vec3 { x, y, z }
+    }
+
+    pub fn x(&self) -> f64 {
+        self.x
+    }
+
+    pub fn y(&self) -> f64 {
+        self.y
+    }
+
+    pub fn z(&self) -> f64 {
+        self.z
+    }
+
+    pub fn unit_vector(vec: &Vec3) -> Vec3 {
+        let length = vec.length();
+        Vec3 {
+            x: vec.x() / length,
+            y: vec.y() / length,
+            z: vec.z() / length,
+        }
+    }
+
+    pub fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    pub fn length(&self) -> f64 {
+        self.length_squared().sqrt()
+    }
+
+    pub fn dot(vec1: &Vec3, vec2: &Vec3) -> f64 {
+        vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z
+    }
+
+    pub fn cross(vec1: &Vec3, vec2: &Vec3) -> Self {
+        Vec3 {
+            x: vec1.y * vec2.z - vec1.z * vec2.y,
+            y: vec1.z * vec2.x - vec1.x * vec2.z,
+            z: vec1.x * vec2.y - vec1.y * vec2.x,
+        }
+    }
+}
+
+impl Add<Vec3> for Vec3 {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl Add<f64> for Vec3 {
+    type Output = Self;
+    fn add(self, rhs: f64) -> Self {
+        Vec3 {
+            x: self.x + rhs,
+            y: self.y + rhs,
+            z: self.z + rhs,
+        }
+    }
+}
+
+impl Sub<Vec3> for Vec3 {
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl Sub<f64> for Vec3 {
+    type Output = Self;
+    fn sub(self, rhs: f64) -> Self {
+        Vec3 {
+            x: self.x - rhs,
+            y: self.y - rhs,
+            z: self.z - rhs,
+        }
+    }
+}
+
+impl Mul<f64> for Vec3 {
+    type Output = Self;
+    fn mul(self, rhs: f64) -> Self {
+        Vec3 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
+
+impl Mul<Vec3> for Vec3 {
+    type Output = Self;
+    fn mul(self, rhs: Vec3) -> Self {
+        Vec3 {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
+    }
+}
+
+impl Div<f64> for Vec3 {
+    type Output = Self;
+    fn div(self, rhs: f64) -> Self {
+        Vec3 {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Self;
+    fn neg(self) -> Self {
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
+    }
+}
