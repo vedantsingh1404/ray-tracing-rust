@@ -2,7 +2,6 @@ use std::env;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
-use rand::Rng;
 
 use rt_in_one_weekend::ray::Ray;
 use rt_in_one_weekend::vec3::Vec3;
@@ -10,17 +9,20 @@ use rt_in_one_weekend::hittable_list::HittableList;
 use rt_in_one_weekend::sphere::Sphere;
 use rt_in_one_weekend::hittable::{Hittable, HitRecord};
 use rt_in_one_weekend::camera::Camera;
+use rt_in_one_weekend::random::random;
 
-fn color_ray(r: &Ray, world: &impl Hittable) -> Vec3 {
+fn color_ray(r: &Ray, world: &impl Hittable, depth: i16) -> Vec3 {
     let mut rec: HitRecord = HitRecord {
         point: Vec3::new(0., 0., 0.),
         normal: Vec3::new(0., 0., 0.),
         t: 0.5
     };
 
+    if depth <= 0 { return Vec3::new(0., 0., 0.); }
+
     if world.hit(r, &0., &f64::INFINITY, &mut rec) {
-        let normal: Vec3 = rec.normal;
-        return (normal + 1.) * 0.5
+        let reflected_point: Vec3 = rec.point + Vec3::unit_vector(&rec.normal) + Vec3::random_vec_in_unit_sphere();
+        return color_ray(&Ray::new(&rec.point, &(reflected_point - rec.point)), world, depth - 1) * 0.5;
     }
     let unit_direction: Vec3 = Vec3::unit_vector(&r.direction());
     let t: f64 = unit_direction.y();
@@ -34,8 +36,8 @@ fn main() -> std::io::Result<()> {
     let aspect_ratio: f64 = (16 as f64) / (9 as f64);
     let image_width: i32 = 800;
     let image_height: i32 = ((image_width as f64) / aspect_ratio) as i32;
-    let num_samples = (&args[2]).parse::<i32>().unwrap();
-    let mut rng = rand::thread_rng();
+    let num_samples = 50;
+    let reflection_depth = 20;
 
     // World Creation
     let mut world: HittableList = HittableList::new();
@@ -57,11 +59,10 @@ fn main() -> std::io::Result<()> {
         for x in 0..image_width {
             let mut c: Vec3 = Vec3::new(0., 0., 0.);
             for _i in 0..num_samples {
-                let rand: f64 = rng.gen_range(0.0..1.0);
-                let u: f64 = ((x as f64) + rand) / ((image_width - 1) as f64);
-                let v: f64 = ((y as f64) + rand) / ((image_height - 1) as f64);
+                let u: f64 = ((x as f64) + random(&0., &1.)) / ((image_width - 1) as f64);
+                let v: f64 = ((y as f64) + random(&0., &1.)) / ((image_height - 1) as f64);
                 let ray: Ray = camera.get_ray(u, v);
-                let c_: Vec3 = color_ray(&ray, &world);
+                let c_: Vec3 = color_ray(&ray, &world, reflection_depth);
                 c = c + c_;
             }
 

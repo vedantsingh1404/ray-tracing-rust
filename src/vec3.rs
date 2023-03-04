@@ -1,4 +1,5 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
+use crate::random::random;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
@@ -45,11 +46,38 @@ impl Vec3 {
         vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z
     }
 
+    pub fn distance(&self, vec: &Vec3) -> f64 {
+        let diff_vec = Vec3 {
+            x: vec.x() - self.x,
+            y: vec.y() - self.y,
+            z: vec.z() - self.z,
+        };
+
+        return diff_vec.length_squared();
+    }
+
     pub fn cross(vec1: &Vec3, vec2: &Vec3) -> Self {
         Vec3 {
             x: vec1.y * vec2.z - vec1.z * vec2.y,
             y: vec1.z * vec2.x - vec1.x * vec2.z,
             z: vec1.x * vec2.y - vec1.y * vec2.x,
+        }
+    }
+
+    pub fn random_vec(min: &f64, max: &f64) -> Self {
+        Vec3 {
+            x: random(min, max),
+            y: random(min, max),
+            z: random(min, max)
+        }
+    }
+
+    pub fn random_vec_in_unit_sphere() -> Self {
+        loop {
+            let rand_vec = Vec3::random_vec(&-1., &1.);
+            if rand_vec.distance(&Vec3::new(0., 0., 0.)) < 1. {
+                return rand_vec
+            }
         }
     }
 }
