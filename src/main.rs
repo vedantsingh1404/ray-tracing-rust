@@ -8,6 +8,7 @@ use rt_in_one_weekend::vec3::Vec3;
 use rt_in_one_weekend::hittable_list::HittableList;
 use rt_in_one_weekend::sphere::Sphere;
 use rt_in_one_weekend::hittable::{Hittable, HitRecord};
+use rt_in_one_weekend::camera::Camera;
 
 fn color_ray(r: &Ray, world: &impl Hittable) -> Vec3 {
     let mut rec: HitRecord = HitRecord {
@@ -38,21 +39,7 @@ fn main() -> std::io::Result<()> {
     world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., 0., -1.), 0.5)));
     world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., -100.5, -1.), 100.)));
 
-    // Camera details
-
-    let viewport_h: i32 = 2;
-    let viewport_w: i32 = ((viewport_h as f64) * aspect_ratio) as i32;
-    let focal_length: i32 = 1;
-
-    let origin: Vec3 = Vec3::new(0., 0., 0.);
-    let horizontal: Vec3 = Vec3::new(viewport_w as f64, 0., 0.);
-    let vertical: Vec3 = Vec3::new(0., viewport_h as f64, 0.);
-
-    let lower_left_corner: Vec3 = Vec3::new(
-        -viewport_w as f64 / 2.,
-        -viewport_h as f64 / 2.,
-        -focal_length as f64,
-    );
+    let camera = Camera::new();
 
     let filename = &args[1];
     let filename_path = Path::new(filename);
@@ -68,10 +55,7 @@ fn main() -> std::io::Result<()> {
             let u: f64 = (x as f64) / ((image_width - 1) as f64);
             let v: f64 = (y as f64) / ((image_height - 1) as f64);
 
-            let ray: Ray = Ray::new(
-                &origin,
-                &(lower_left_corner + horizontal * u + vertical * v - origin),
-            );
+            let ray: Ray = camera.get_ray(u, v);
             let c: Vec3 = color_ray(&ray, &world);
             color(&mut writer, &c);
         }
