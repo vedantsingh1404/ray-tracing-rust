@@ -12,13 +12,3 @@ pub trait Hittable {
         return false;
     }
 }
-
-pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
-}
-
-impl HittableList {
-    fn insert_hittable<T: Hittable>(&mut self, hittable: &T) {
-        self.objects.push(Box::new(hittable.clone()) as Box<dyn Hittable>);
-    }
-}
