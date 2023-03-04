@@ -2,6 +2,7 @@ use std::env;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
+use std::rc::Rc;
 
 use rt_in_one_weekend::ray::Ray;
 use rt_in_one_weekend::vec3::Vec3;
@@ -10,19 +11,25 @@ use rt_in_one_weekend::sphere::Sphere;
 use rt_in_one_weekend::hittable::{Hittable, HitRecord};
 use rt_in_one_weekend::camera::Camera;
 use rt_in_one_weekend::random::random;
+use rt_in_one_weekend::lambertian::Lambertian;
 
 fn color_ray(r: &Ray, world: &impl Hittable, depth: i16) -> Vec3 {
     let mut rec: HitRecord = HitRecord {
         point: Vec3::new(0., 0., 0.),
         normal: Vec3::new(0., 0., 0.),
-        t: 0.5
+        t: 0.5,
+        material: Rc::new(Lambertian::new(Vec3::new(0., 0., 0.)))
     };
 
     if depth <= 0 { return Vec3::new(0., 0., 0.); }
 
+    let mut attenuation: Vec3 = Vec3::new(0., 0., 0.);
+    let mut scattered: Ray = Ray::new(&Vec3::new(0., 0., 0.), &Vec3::new(0., 0., 0.));
+
     if world.hit(r, &0.0001, &f64::INFINITY, &mut rec) {
-        let reflected_point: Vec3 = rec.point + Vec3::random_vec_in_same_hemisphere(&rec.normal);
-        return color_ray(&Ray::new(&rec.point, &(reflected_point - rec.point)), world, depth - 1) * 0.5;
+        if rec.material.scatter(r, &rec, &mut attenuation, &mut scattered) {
+            return attenuation * color_ray(&scattered, world, depth - 1);
+        }
     }
     let unit_direction: Vec3 = Vec3::unit_vector(&r.direction());
     let t: f64 = unit_direction.y();
@@ -41,8 +48,8 @@ fn main() -> std::io::Result<()> {
 
     // World Creation
     let mut world: HittableList = HittableList::new();
-    world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., 0., -1.), 0.5)));
-    world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., -100.5, -1.), 100.)));
+    world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., 0., -1.), 0.5, Rc::new(Lambertian::new(Vec3::new(0.5, 0.2, 0.3))))));
+    world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., -100.5, -1.), 100., Rc::new(Lambertian::new(Vec3::new(0.1, 0.7, 0.2))))));
 
     let camera = Camera::new();
 

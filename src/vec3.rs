@@ -89,6 +89,11 @@ impl Vec3 {
             return -rand_vec;
         }
     }
+
+    pub fn near_zero(&self) -> bool {
+        let EPSILON: f64 = 0.00001;
+        return self.x.abs() < EPSILON && self.y.abs() < EPSILON && self.z.abs() < EPSILON;
+    }
 }
 
 impl Add<Vec3> for Vec3 {

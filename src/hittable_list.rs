@@ -1,6 +1,8 @@
 use crate::hittable::{Hittable, HitRecord};
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use crate::lambertian::Lambertian;
+use std::rc::Rc;
 
 pub struct HittableList {
     objects: Vec<Box<dyn Hittable>>,
@@ -21,7 +23,8 @@ impl Hittable for HittableList {
         let mut temp_rec: HitRecord = HitRecord {
             point: Vec3::new(0., 0., 0.),
             normal: Vec3::new(0., 0., 0.),
-            t: 0.
+            t: 0.,
+            material: Rc::new(Lambertian::new(Vec3::new(0., 0., 0.)))
         };
 
         let mut hit_anything: bool = false;

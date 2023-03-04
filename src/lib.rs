@@ -5,3 +5,5 @@ pub mod sphere;
 pub mod vec3;
 pub mod hittable_list;
 pub mod random;
+pub mod material;
+pub mod lambertian;
