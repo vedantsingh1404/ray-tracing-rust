@@ -33,6 +33,7 @@ impl Hittable for HittableList {
                 closest_so_far = temp_rec.t;
             }
         }
+
         *rec = temp_rec;
         return hit_anything;
     }

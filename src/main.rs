@@ -5,26 +5,20 @@ use std::path::Path;
 
 use rt_in_one_weekend::ray::Ray;
 use rt_in_one_weekend::vec3::Vec3;
+use rt_in_one_weekend::hittable_list::HittableList;
+use rt_in_one_weekend::sphere::Sphere;
+use rt_in_one_weekend::hittable::{Hittable, HitRecord};
 
-fn hit_sphere(centre: &Vec3, radius: f64, ray: &Ray) -> f64 {
-    let oc: Vec3 = ray.origin() - *centre;
-    let a = Vec3::dot(&ray.direction(), &ray.direction());
-    let b = Vec3::dot(&ray.direction(), &oc) * 2.;
-    let c = Vec3::dot(&oc, &oc) - (radius * radius);
-    let discriminant = b * b - 4. * a * c;
-    if discriminant < 0. {
-        return -1.;
-    } else {
-        return ((-b) - f64::sqrt(discriminant)) / (2. * a);
-    }
-}
+fn color_ray(r: &Ray, world: &impl Hittable) -> Vec3 {
+    let mut rec: HitRecord = HitRecord {
+        point: Vec3::new(0., 0., 0.),
+        normal: Vec3::new(0., 0., 0.),
+        t: 0.5
+    };
 
-fn color_ray(r: &Ray) -> Vec3 {
-    let t = hit_sphere(&Vec3::new(0., 0., -1.), 0.5, r);
-
-    if t > 0. {
-        let normal: Vec3 = Vec3::unit_vector(&(r.at(t) - Vec3::new(0., 0., -1.)));
-        return (normal + 1.) * 0.5;
+    if world.hit(r, &0., &f64::INFINITY, &mut rec) {
+        let normal: Vec3 = rec.normal;
+        return (normal + 1.) * 0.5
     }
     let unit_direction: Vec3 = Vec3::unit_vector(&r.direction());
     let t: f64 = unit_direction.y();
@@ -38,6 +32,11 @@ fn main() -> std::io::Result<()> {
     let aspect_ratio: f64 = (16 as f64) / (9 as f64);
     let image_width: i32 = 400;
     let image_height: i32 = ((image_width as f64) / aspect_ratio) as i32;
+
+    // World Creation
+    let mut world: HittableList = HittableList::new();
+    world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., 0., -1.), 0.5)));
+    world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., -100.5, -1.), 100.)));
 
     // Camera details
 
@@ -64,7 +63,7 @@ fn main() -> std::io::Result<()> {
     let header = format!("P3\n{} {}\n255\n", image_width, image_height);
     writer.write(header.as_bytes()).unwrap();
 
-    for y in 0..image_height {
+    for y in (0..image_height).rev() {
         for x in 0..image_width {
             let u: f64 = (x as f64) / ((image_width - 1) as f64);
             let v: f64 = (y as f64) / ((image_height - 1) as f64);
@@ -73,7 +72,7 @@ fn main() -> std::io::Result<()> {
                 &origin,
                 &(lower_left_corner + horizontal * u + vertical * v - origin),
             );
-            let c: Vec3 = color_ray(&ray);
+            let c: Vec3 = color_ray(&ray, &world);
             color(&mut writer, &c);
         }
     }
