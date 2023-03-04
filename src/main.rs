@@ -2,6 +2,7 @@ use std::env;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
+use rand::Rng;
 
 use rt_in_one_weekend::ray::Ray;
 use rt_in_one_weekend::vec3::Vec3;
@@ -31,8 +32,10 @@ fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
     let aspect_ratio: f64 = (16 as f64) / (9 as f64);
-    let image_width: i32 = 400;
+    let image_width: i32 = 800;
     let image_height: i32 = ((image_width as f64) / aspect_ratio) as i32;
+    let num_samples = (&args[2]).parse::<i32>().unwrap();
+    let mut rng = rand::thread_rng();
 
     // World Creation
     let mut world: HittableList = HittableList::new();
@@ -52,21 +55,46 @@ fn main() -> std::io::Result<()> {
 
     for y in (0..image_height).rev() {
         for x in 0..image_width {
-            let u: f64 = (x as f64) / ((image_width - 1) as f64);
-            let v: f64 = (y as f64) / ((image_height - 1) as f64);
+            let mut c: Vec3 = Vec3::new(0., 0., 0.);
+            for _i in 0..num_samples {
+                let rand: f64 = rng.gen_range(0.0..1.0);
+                let u: f64 = ((x as f64) + rand) / ((image_width - 1) as f64);
+                let v: f64 = ((y as f64) + rand) / ((image_height - 1) as f64);
+                let ray: Ray = camera.get_ray(u, v);
+                let c_: Vec3 = color_ray(&ray, &world);
+                c = c + c_;
+            }
 
-            let ray: Ray = camera.get_ray(u, v);
-            let c: Vec3 = color_ray(&ray, &world);
-            color(&mut writer, &c);
+            color(&mut writer, &c, num_samples);
         }
     }
     Ok(())
 }
 
-fn color<W: Write>(writer: &mut std::io::BufWriter<W>, color: &Vec3) {
-    let x_u8: u8 = (color.x() * 255.99) as u8;
-    let y_u8: u8 = (color.y() * 255.99) as u8;
-    let z_u8: u8 = (color.z() * 255.99) as u8;
+fn color<W: Write>(writer: &mut std::io::BufWriter<W>, color: &Vec3, num_samples: i32) {
+    let mut r: f64 = color.x();
+    let mut g: f64 = color.y();
+    let mut b: f64 = color.z();
+
+    let ratio: f64 = 1. / (num_samples as f64);
+
+    r = r * ratio;
+    g = g * ratio;
+    b = b * ratio;
+
+    let x_u8: u8 = (256. * clamp(r, 0., 0.999)) as u8;
+    let y_u8: u8 = (256. * clamp(g, 0., 0.999)) as u8;
+    let z_u8: u8 = (256. * clamp(b, 0., 0.999)) as u8;
     let line_to_write = format!("{} {} {}\n", x_u8, y_u8, z_u8);
     writer.write(line_to_write.as_bytes()).unwrap();
+}
+
+fn clamp(value: f64, min: f64, max: f64) -> f64 {
+    if value < min {
+        return min;
+    }
+    if value > max {
+        return max;
+    }
+    return value;
 }
