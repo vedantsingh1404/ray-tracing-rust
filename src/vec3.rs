@@ -76,8 +76,17 @@ impl Vec3 {
         loop {
             let rand_vec = Vec3::random_vec(&-1., &1.);
             if rand_vec.distance(&Vec3::new(0., 0., 0.)) < 1. {
-                return rand_vec
+                return rand_vec;
             }
+        }
+    }
+
+    pub fn random_vec_in_same_hemisphere(vec: &Vec3) -> Self {
+        let rand_vec = Vec3::random_vec_in_unit_sphere();
+        if Vec3::dot(&rand_vec, vec) > 0. {
+            return rand_vec;
+        } else {
+            return -rand_vec;
         }
     }
 }

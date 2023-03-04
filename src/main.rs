@@ -20,8 +20,8 @@ fn color_ray(r: &Ray, world: &impl Hittable, depth: i16) -> Vec3 {
 
     if depth <= 0 { return Vec3::new(0., 0., 0.); }
 
-    if world.hit(r, &0., &f64::INFINITY, &mut rec) {
-        let reflected_point: Vec3 = rec.point + Vec3::unit_vector(&rec.normal) + Vec3::random_vec_in_unit_sphere();
+    if world.hit(r, &0.0001, &f64::INFINITY, &mut rec) {
+        let reflected_point: Vec3 = rec.point + Vec3::random_vec_in_same_hemisphere(&rec.normal);
         return color_ray(&Ray::new(&rec.point, &(reflected_point - rec.point)), world, depth - 1) * 0.5;
     }
     let unit_direction: Vec3 = Vec3::unit_vector(&r.direction());
@@ -79,9 +79,9 @@ fn color<W: Write>(writer: &mut std::io::BufWriter<W>, color: &Vec3, num_samples
 
     let ratio: f64 = 1. / (num_samples as f64);
 
-    r = r * ratio;
-    g = g * ratio;
-    b = b * ratio;
+    r = (r * ratio).sqrt();
+    g = (g * ratio).sqrt();
+    b = (b * ratio).sqrt();
 
     let x_u8: u8 = (256. * clamp(r, 0., 0.999)) as u8;
     let y_u8: u8 = (256. * clamp(g, 0., 0.999)) as u8;
