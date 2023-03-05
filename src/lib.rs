@@ -7,3 +7,4 @@ pub mod hittable_list;
 pub mod random;
 pub mod material;
 pub mod lambertian;
+pub mod metal;
