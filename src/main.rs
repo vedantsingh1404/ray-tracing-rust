@@ -13,6 +13,7 @@ use rt_in_one_weekend::camera::Camera;
 use rt_in_one_weekend::random::random;
 use rt_in_one_weekend::lambertian::Lambertian;
 use rt_in_one_weekend::metal::Metal;
+use rt_in_one_weekend::diaelectric::Diaelectric;
 
 fn color_ray(r: &Ray, world: &impl Hittable, depth: i16) -> Vec3 {
     let mut rec: HitRecord = HitRecord {
@@ -41,7 +42,7 @@ fn color_ray(r: &Ray, world: &impl Hittable, depth: i16) -> Vec3 {
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
-    let aspect_ratio: f64 = (16 as f64) / (9 as f64);
+    let aspect_ratio: f64 = (16 as f64) / (10 as f64);
     let image_width: i32 = 800;
     let image_height: i32 = ((image_width as f64) / aspect_ratio) as i32;
     let num_samples = 50;
@@ -52,8 +53,8 @@ fn main() -> std::io::Result<()> {
 
     let material_ground = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.)));
     let material_center = Rc::new(Lambertian::new(Vec3::new(0.7, 0.3, 0.3)));
-    let material_left = Rc::new(Metal::new(Vec3::new(0.8, 0.8, 0.8), 0.3));
-    let material_right = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 1.0));
+    let material_left = Rc::new(Diaelectric::new(1.5));
+    let material_right = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2));
 
 
     world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., -100.5, -1.), 100., material_ground)));
