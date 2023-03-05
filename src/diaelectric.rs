@@ -29,9 +29,9 @@ impl Material for Diaelectric {
         let scatter_direction: Vec3;
 
         if cannot_refract {
-            scatter_direction = Vec3::reflect(&Vec3::unit_vector(&ray_in_d), &normal);
+            scatter_direction = Vec3::reflect(Vec3::unit_vector(&ray_in_d), normal);
         } else {
-            scatter_direction = Vec3::refract(&Vec3::unit_vector(&ray_in_d), &normal, k);
+            scatter_direction = Vec3::refract(Vec3::unit_vector(&ray_in_d), normal, k);
         }
 
         *ray_out = Ray::new(&rec.point, &(scatter_direction));

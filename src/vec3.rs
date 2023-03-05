@@ -95,25 +95,18 @@ impl Vec3 {
         return self.x.abs() < EPSILON && self.y.abs() < EPSILON && self.z.abs() < EPSILON;
     }
 
-    pub fn reflect(v: &Vec3, n: &Vec3) -> Self {
-        return *v - *n * 2. * (Vec3::dot(v, n));
+    pub fn reflect(v: Vec3, n: Vec3) -> Self {
+        return v - n * 2. * (Vec3::dot(&v, &n));
     }
 
-    // pub fn refract(v: Vec3, n: Vec3, k: f64) -> Self {
-    //     let unit_v = Vec3::unit_vector(&v);
-    //     let cos = -Vec3::dot(&unit_v, &n);
+    pub fn refract(v: Vec3, n: Vec3, k: f64) -> Self {
+        let unit_v = Vec3::unit_vector(&v);
+        let cos = -Vec3::dot(&unit_v, &n);
 
-    //     let r_perp = (unit_v + n * cos) * k;
-    //     let r_parr = -n * (-r_perp.length_squared() + 1.).sqrt();
+        let r_perp = (unit_v + n * cos) * k;
+        let r_parr = -n * (-r_perp.length_squared() + 1.).sqrt();
 
-    //     return r_perp + r_parr;
-    // }
-
-    pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
-        let cos_theta = (-Vec3::dot(uv, n)).min(1.0);
-        let r_out_perp = (*uv + (*n) * cos_theta) * etai_over_etat;
-        let r_out_parallel = (*n) * -((1. - r_out_perp.length_squared()).abs().sqrt());
-        r_out_perp + r_out_parallel
+        return r_perp + r_parr;
     }
 }
 
