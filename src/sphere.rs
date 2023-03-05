@@ -41,7 +41,7 @@ impl Hittable for Sphere {
             }
         }
 
-        let normal: Vec3 = Vec3::unit_vector(&(r.at(root) - self.centre));
+        let normal: Vec3 = Vec3::unit_vector(&((r.at(root) - self.centre) / self.radius));
         rec.point = r.at(root);
         rec.t = root;
         rec.normal = normal;

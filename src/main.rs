@@ -14,6 +14,7 @@ use rt_in_one_weekend::random::random;
 use rt_in_one_weekend::lambertian::Lambertian;
 use rt_in_one_weekend::metal::Metal;
 use rt_in_one_weekend::diaelectric::Diaelectric;
+use rt_in_one_weekend::material::Material;
 
 fn color_ray(r: &Ray, world: &impl Hittable, depth: i16) -> Vec3 {
     let mut rec: HitRecord = HitRecord {
@@ -51,15 +52,16 @@ fn main() -> std::io::Result<()> {
     // World Creation
     let mut world: HittableList = HittableList::new();
 
-    let material_ground = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.)));
-    let material_center = Rc::new(Lambertian::new(Vec3::new(0.7, 0.3, 0.3)));
-    let material_left = Rc::new(Diaelectric::new(1.5));
-    let material_right = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2));
+    let material_ground: Rc<dyn Material> = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.)));
+    let material_center: Rc<dyn Material>  = Rc::new(Lambertian::new(Vec3::new(0.7, 0.3, 0.3)));
+    let material_left: Rc<dyn Material> = Rc::new(Diaelectric::new(1.5));
+    let material_right: Rc<dyn Material> = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2));
 
 
     world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., -100.5, -1.), 100., material_ground)));
     world.insert_hittable(Box::new(Sphere::new(Vec3::new(0., 0., -1.), 0.5, material_center)));
-    world.insert_hittable(Box::new(Sphere::new(Vec3::new(-1., 0., -1.), 0.5, material_left)));
+    world.insert_hittable(Box::new(Sphere::new(Vec3::new(-1., 0., -1.), 0.5, Rc::clone(&material_left))));
+    world.insert_hittable(Box::new(Sphere::new(Vec3::new(-1., 0., -1.), -0.4, Rc::clone(&material_left))));
     world.insert_hittable(Box::new(Sphere::new(Vec3::new(1., 0., -1.), 0.5, material_right)));
 
 

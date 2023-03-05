@@ -100,11 +100,10 @@ impl Vec3 {
     }
 
     pub fn refract(v: Vec3, n: Vec3, k: f64) -> Self {
-        let unit_v = Vec3::unit_vector(&v);
-        let cos = -Vec3::dot(&unit_v, &n);
+        let cos = -Vec3::dot(&v, &n);
 
-        let r_perp = (unit_v + n * cos) * k;
-        let r_parr = -n * (-r_perp.length_squared() + 1.).sqrt();
+        let r_perp = (v + n * cos) * k;
+        let r_parr = -n * (-r_perp.length_squared() + 1.).abs().sqrt();
 
         return r_perp + r_parr;
     }

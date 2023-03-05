@@ -2,6 +2,7 @@ use crate::material::Material;
 use crate::vec3::Vec3;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
+use crate::random::random;
 
 pub struct Diaelectric {
     ir: f64
@@ -10,6 +11,13 @@ pub struct Diaelectric {
 impl Diaelectric {
     pub fn new(ir: f64) -> Self {
         return Diaelectric { ir };
+    }
+
+    pub fn reflectance(cos: &f64, k: &f64) -> f64 {
+        let mut r0: f64 = (1. - *k) / (1. + *k);
+        r0 = r0 * r0;
+
+        return r0 + (1. - r0) * f64::powf(1. - *cos, 5.);
     }
 }
 
@@ -28,7 +36,7 @@ impl Material for Diaelectric {
 
         let scatter_direction: Vec3;
 
-        if cannot_refract {
+        if cannot_refract || Diaelectric::reflectance(&cos, &k) < random(&0., &1.) {
             scatter_direction = Vec3::reflect(Vec3::unit_vector(&ray_in_d), normal);
         } else {
             scatter_direction = Vec3::refract(Vec3::unit_vector(&ray_in_d), normal, k);
